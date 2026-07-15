@@ -1,10 +1,14 @@
 from openai import OpenAI
 import streamlit as st
 
-client = OpenAI(api_key=st.secrets["OpenAI_Key"])
+api_key = st.secrets.get("OpenAI_Key", "")
+client = OpenAI(api_key=api_key) if api_key else None
 
 # Define the function to extract and categorize intents and entities using OpenAI API
 def extract_and_categorize(text):
+    if client is None:
+        st.error("Set the OpenAI_Key secret to use this app.")
+        return None
     prompt = f"""
     Extract and categorize the intents and entities from the following text:
     
