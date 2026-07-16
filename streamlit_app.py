@@ -1,44 +1,31 @@
-from openai import OpenAI
 import streamlit as st
 
-api_key = st.secrets.get("OpenAI_Key", "")
-client = OpenAI(api_key=api_key) if api_key else None
+from storygen import render_story_app
+from languagetranslator import render_translation_app
+from Weather import render_weather_app
 
-# Define the function to extract and categorize intents and entities using OpenAI API
-def extract_and_categorize(text):
-    if client is None:
-        st.error("Set the OpenAI_Key secret to use this app.")
-        return None
-    prompt = f"""
-    Extract and categorize the intents and entities from the following text:
-    
-    Text: "{text}"
-    
-    Provide the result in the following JSON format:
-    {{
-        "intents": [
-            {{"intent": "<intent>", "category": "<category>"}}
-        ],
-        "entities": [
-            {{"entity": "<entity>", "category": "<category>"}}
-        ]
-    }}
-    
-    Make sure the categories are appropriate and relevant to the context.
-    """
-    response = client.chat.completions.create(model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": prompt}
-    ],
-    max_tokens=150)
-    return response.choices[0].message.content.strip()
+st.set_page_config(page_title="AI Toolkit", page_icon="✨", layout="wide")
 
-# Streamlit UI
-st.title("Intents and Entities Extraction with Categorization using GPT-3.5-turbo")
-user_input = st.text_input("Enter your query:")
+st.title("✨ AI Toolkit")
+st.write("A single Streamlit home page with three apps: story generation, translation, and weather.")
 
-if user_input:
-    result = extract_and_categorize(user_input)
-    st.write("Extracted and Categorized Intents and Entities:")
-    st.json(result)
+try:
+    api_key = st.secrets.get("OpenAI_Key", "")
+except Exception:
+    api_key = ""
+
+if api_key:
+    st.info("OpenAI is configured. AI features will use your secret key.")
+else:
+    st.info("Add an OpenAI key to Streamlit secrets as OpenAI_Key to enable AI generation and translation.")
+
+story_tab, translate_tab, weather_tab = st.tabs(["📖 Story Generator", "🌎 Translator", "🌦️ Weather Bot"])
+
+with story_tab:
+    render_story_app()
+
+with translate_tab:
+    render_translation_app()
+
+with weather_tab:
+    render_weather_app()

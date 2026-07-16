@@ -1,12 +1,14 @@
 [project]
 name = "blank-app-template"
 version = "0.1.0"
-description = "A simple Streamlit app template."
+description = "A Streamlit suite with story generation, translation, and weather apps."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "streamlit>=1.59.2",
     "openai>=2.45.0",
+    "requests>=2.32.0",
+    "gTTS>=2.2.4",
 ]
 
 [tool.uv]
