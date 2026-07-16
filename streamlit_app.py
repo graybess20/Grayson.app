@@ -1,4 +1,11 @@
+import sys
+from pathlib import Path
+
 import streamlit as st
+
+APP_ROOT = str(Path(__file__).resolve().parent)
+if APP_ROOT not in sys.path:
+    sys.path.insert(0, APP_ROOT)
 
 from storygen import render_story_app
 from languagetranslator import render_translation_app
