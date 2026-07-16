@@ -10,21 +10,18 @@ if str(APP_ROOT) not in sys.path:
 
 
 def load_local_module(module_name: str):
-    try:
-        return __import__(module_name)
-    except ModuleNotFoundError:
-        module_path = APP_ROOT / f"{module_name}.py"
-        if not module_path.exists():
-            raise
+    module_path = APP_ROOT / f"{module_name}.py"
+    if not module_path.exists():
+        raise FileNotFoundError(f"Unable to find module file for {module_name} at {module_path}")
 
-        spec = importlib.util.spec_from_file_location(module_name, module_path)
-        if spec is None or spec.loader is None:
-            raise ModuleNotFoundError(f"Unable to load module {module_name}")
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    if spec is None or spec.loader is None:
+        raise ModuleNotFoundError(f"Unable to load module {module_name}")
 
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
-        spec.loader.exec_module(module)
-        return module
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 story_module = load_local_module("storygen")
