@@ -9,11 +9,25 @@ if str(APP_ROOT) not in sys.path:
     sys.path.insert(0, str(APP_ROOT))
 
 
-def load_local_module(module_name: str):
-    module_path = APP_ROOT / f"{module_name}.py"
-    if not module_path.exists():
-        raise FileNotFoundError(f"Unable to find module file for {module_name} at {module_path}")
+def _find_module_path(module_name: str) -> Path:
+    candidates = [
+        APP_ROOT / f"{module_name}.py",
+        APP_ROOT / module_name / "__init__.py",
+    ]
 
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
+    for path in APP_ROOT.rglob(f"{module_name}.py"):
+        if path.is_file():
+            return path
+
+    raise FileNotFoundError(f"Unable to find module file for {module_name}")
+
+
+def load_local_module(module_name: str):
+    module_path = _find_module_path(module_name)
     spec = importlib.util.spec_from_file_location(module_name, module_path)
     if spec is None or spec.loader is None:
         raise ModuleNotFoundError(f"Unable to load module {module_name}")
