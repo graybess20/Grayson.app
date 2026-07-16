@@ -1,15 +1,39 @@
+import importlib.util
 import sys
 from pathlib import Path
 
 import streamlit as st
 
-APP_ROOT = str(Path(__file__).resolve().parent)
-if APP_ROOT not in sys.path:
-    sys.path.insert(0, APP_ROOT)
+APP_ROOT = Path(__file__).resolve().parent
+if str(APP_ROOT) not in sys.path:
+    sys.path.insert(0, str(APP_ROOT))
 
-from storygen import render_story_app
-from languagetranslator import render_translation_app
-from Weather import render_weather_app
+
+def load_local_module(module_name: str):
+    try:
+        return __import__(module_name)
+    except ModuleNotFoundError:
+        module_path = APP_ROOT / f"{module_name}.py"
+        if not module_path.exists():
+            raise
+
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+        if spec is None or spec.loader is None:
+            raise ModuleNotFoundError(f"Unable to load module {module_name}")
+
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        return module
+
+
+story_module = load_local_module("storygen")
+language_module = load_local_module("languagetranslator")
+weather_module = load_local_module("Weather")
+
+render_story_app = story_module.render_story_app
+render_translation_app = language_module.render_translation_app
+render_weather_app = weather_module.render_weather_app
 
 st.set_page_config(page_title="AI Toolkit", page_icon="✨", layout="wide")
 
